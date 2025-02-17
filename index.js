@@ -66,6 +66,8 @@ async function run() {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
+    
+   
 
     app.get('/users/admin/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
@@ -86,6 +88,37 @@ async function run() {
       res.send(result);
     });
 
+    app.patch('/menu/:id', verifyToken, verifyAdmin, async (req, res) => {
+      const item = req.body;
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          name: item.name,
+          category: item.category,
+          price: item.price,
+          recipe: item.recipe,
+          image: item.image
+        }
+      };
+      const result = await menuCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
+    app.delete('/menu/:id', verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await menuCollection.deleteOne(query);
+      res.send(result);
+     })
+     
+     app.get('/menu/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await menuCollection.findOne(query)
+      res.send(result);
+    })
+
     app.post('/menu', verifyToken, verifyAdmin, async(req, res) => {
       const item = req.body;
       const result = await menuCollection.insertOne(item);
@@ -97,10 +130,6 @@ async function run() {
       res.send(result);
     });
 
-    app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
-      const result = await userCollection.find().toArray();
-      res.send(result);
-    });
 
     app.get('/carts', async (req, res) => {
       const email = req.query.email;
@@ -132,6 +161,7 @@ async function run() {
       const result = await cartCollection.deleteOne(query);
       res.send(result);
     });
+
 
     app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
